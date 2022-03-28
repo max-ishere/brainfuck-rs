@@ -1,0 +1,75 @@
+#+TITLE: Brainfuck interpreter written in Rust.
+
+* Usage
+
+#+begin_src shell
+cargo run
+#+end_src
+
+[[https://en.wikipedia.org/wiki/Brainfuck][Wikipedia: Brainfuck]]
+
+Input your command as one line after the propmt.
+
+*Any input that the program takes is put into a buffer.* So if you write a program like =,>,.<.= the result will be the same in both cases:
+
+#+begin_src brainfuck
+Brainfuck interpreter. Input your program below.
+,>,.<.
+[src/main.rs:87] command = InputValue
+a
+[src/main.rs:87] command = ForwardCell
+[src/main.rs:102] ptr = 1
+[src/main.rs:87] command = InputValue
+a
+[src/main.rs:87] command = PrintValue
+[src/main.rs:87] command = BackwardCell
+[src/main.rs:106] ptr = 0
+[src/main.rs:87] command = PrintValue
+aa
+End of execution.
+#+end_src
+
+#+begin_src brainfuck
+Brainfuck interpreter. Input your program below.
+,>,.<.
+[src/main.rs:87] command = InputValue
+aa
+[src/main.rs:87] command = ForwardCell
+[src/main.rs:102] ptr = 1
+[src/main.rs:87] command = InputValue
+[src/main.rs:87] command = PrintValue
+[src/main.rs:87] command = BackwardCell
+[src/main.rs:106] ptr = 0
+[src/main.rs:87] command = PrintValue
+aa
+End of execution.
+#+end_src
+
+(for nerds that wonder how it works)
+
+#+begin_src rust
+Command::InputValue => {
+    if input_buffer.len() == 0 {
+        std::io::stdin()
+            .read_line(&mut input_buffer)
+            .expect("Error while reading stdin.");
+        input_buffer.remove(input_buffer.len() - 1);
+    }
+    if input_buffer.len() >= 1 {
+        if ptr >= data.len() {
+            data.resize(ptr + 1, 0);
+        }
+        data[ptr] = input_buffer.remove(0) as u8;
+    } else {
+        panic!("Error while reading input.")
+    }
+}
+#+end_src
+
+* Disable debug logging
+
+Redirect =stderr= to /dev/null. (Linux).
+
+#+begin_src shell
+cargo run --release 2> /dev/null
+#+end_src
